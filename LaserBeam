@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,22 +7,26 @@ public class LaserBeam : MonoBehaviour
 {
     #region Private Variables
 
+    Vector3 pos, dir;
+
     public GameObject laserObj;
     private LineRenderer laser;
     private List<Vector3> laserIndices = new List<Vector3>();
 
     #endregion
-    public LaserBeam(Vector3 pos, Vector3 dir, float startWidth, float endWidth, Color startColor, Color endColor, Material material)
+    public LaserBeam(Vector3 pos, Vector3 dir, Material material)
     {
         laser = new LineRenderer();
         laserObj = new GameObject();
         laserObj.name = "Laser Beam";
+        this.pos = pos;
+        this.dir = dir;
 
         laser = this.laserObj.AddComponent(typeof(LineRenderer)) as LineRenderer;
-        laser.startWidth = startWidth;
-        laser.endWidth = endWidth;
-        laser.startColor = startColor;
-        laser.endColor = endColor;
+        laser.startWidth = 0.1f;
+        laser.endWidth = 0.1f;
+        laser.startColor = Color.green;
+        laser.endColor = Color.green;
         laser.material = material;
 
         CastLaser(pos, dir);
@@ -53,6 +58,10 @@ public class LaserBeam : MonoBehaviour
             Vector3 dir = Vector3.Reflect(direction, hit.normal);
 
             CastLaser(pos, dir);
+        }
+        else if (hit.collider.tag.Equals("Receiver"))
+        {
+            Console.WriteLine("\nThanks for playing!");
         }
         else
         {

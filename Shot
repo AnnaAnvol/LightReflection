@@ -9,7 +9,7 @@ public class Shot : MonoBehaviour
     public LaserBeam prefabs;
     private void Start()
     {
-        var beam = Instantiate(prefabs, transform.position, transform.rotation);
+        beam = Instantiate(prefabs, transform.position, transform.rotation);
     }
 
     private void Update()

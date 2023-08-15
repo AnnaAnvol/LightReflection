@@ -14,6 +14,7 @@ public class LaserBeam : MonoBehaviour
     private List<Vector3> laserIndices = new List<Vector3>();
 
     #endregion
+
     public LaserBeam(Vector3 pos, Vector3 dir, Material material)
     {
         laser = new LineRenderer();
@@ -61,8 +62,8 @@ public class LaserBeam : MonoBehaviour
         }
         else if (hit.collider.tag.Equals("Receiver"))
         {
-            Console.WriteLine("\nThanks for playing!");
-        }
+            Debug.Log("Level Completed!!!");
+        }    
         else
         {
             laserIndices.Add(hit.point);

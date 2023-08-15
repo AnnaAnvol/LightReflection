@@ -15,7 +15,7 @@ public class LaserBeam : MonoBehaviour
 
     #endregion
 
-    public LaserBeam(Vector3 pos, Vector3 dir, Material material)
+    public void Setup(Vector3 pos, Vector3 dir, Material material)
     {
         laser = new LineRenderer();
         laserObj = new GameObject();

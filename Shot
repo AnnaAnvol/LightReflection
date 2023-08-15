@@ -6,10 +6,14 @@ public class Shot : MonoBehaviour
 {
     public Material material;
     LaserBeam beam;
-
-    void Update()
+    public LaserBeam prefabs;
+    private void Start()
     {
-        Destroy(GameObject.Find("Laser Beam"));
-        beam = new LaserBeam(gameObject.transform.position, gameObject.transform.right, material);
+        var beam = Instantiate(prefabs, transform.position, transform.rotation);
+    }
+
+    private void Update()
+    {
+        beam.Setup(gameObject.transform.position, gameObject.transform.right, material);
     }
 }

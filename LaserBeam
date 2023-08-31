@@ -1,85 +1,82 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LaserBeam : MonoBehaviour
 {
-    #region Private Variables
-
-    Vector3 pos, dir;
-
-    public GameObject laserObj;
     private LineRenderer laser;
     private List<Vector3> laserIndices = new List<Vector3>();
 
-    #endregion
+    public Material material;
+    public Vector3 targetPosition;
+
+    private bool reachedTarget = false;
 
     public void Setup(Vector3 pos, Vector3 dir, Material material)
     {
-        laser = new LineRenderer();
-        laserObj = new GameObject();
-        laserObj.name = "Laser Beam";
-        this.pos = pos;
-        this.dir = dir;
-
-        laser = this.laserObj.AddComponent(typeof(LineRenderer)) as LineRenderer;
+        GameObject laserObj = new GameObject("Laser Beam");
+        laser = laserObj.AddComponent<LineRenderer>();
         laser.startWidth = 0.1f;
         laser.endWidth = 0.1f;
         laser.startColor = Color.green;
         laser.endColor = Color.green;
         laser.material = material;
 
+        targetPosition = pos + dir * 100; //Default target position
+
         CastLaser(pos, dir);
     }
 
     private void CastLaser(Vector3 pos, Vector3 dir)
     {
+        laserIndices.Clear();
         laserIndices.Add(pos);
 
-        Ray ray = new Ray(pos, dir);
         RaycastHit hit;
+        int maxReflections = 100;
+        int reflections = 0;
 
-        if (Physics.Raycast(ray, out hit, 100, 1))
+        while (reflections < maxReflections)
         {
-            CheckHit(hit, dir);
+            if (Physics.Raycast(pos, dir, out hit, 100))
+            {
+                if (hit.collider.CompareTag("Mirror"))
+                {
+                    pos = hit.point;
+                    dir = Vector3.Reflect(dir, hit.normal);
+                    laserIndices.Add(pos);
+                    reflections++;
+                }
+                else if (hit.collider.CompareTag("Receiver"))
+                {
+                    reachedTarget = true;
+                    targetPosition = hit.point; // Update
+                    break;
+                }
+                else
+                {
+                    laserIndices.Add(hit.point);
+                    break;
+                }
+            }
+            else
+            {
+                pos += dir * 100;
+                laserIndices.Add(pos);
+                break;
+            }
         }
-        else
-        {
-            laserIndices.Add(ray.GetPoint(100));
-            UpdateLaser();
-        }
-    }
-
-    private void CheckHit(RaycastHit hit, Vector3 direction)
-    {
-        if (hit.collider.tag.Equals("Mirror"))
-        {
-            Vector3 pos = hit.point;
-            Vector3 dir = Vector3.Reflect(direction, hit.normal);
-
-            CastLaser(pos, dir);
-        }
-        else if (hit.collider.tag.Equals("Receiver"))
-        {
-            Debug.Log("Level Completed!!!");
-        }    
-        else
-        {
-            laserIndices.Add(hit.point);
-            UpdateLaser();
-        }
+        UpdateLaser();
     }
 
     private void UpdateLaser()
     {
-        int count = 0;
         laser.positionCount = laserIndices.Count;
+        laser.SetPositions(laserIndices.ToArray());
 
-        foreach (Vector3 index in laserIndices)
+        if (reachedTarget)
         {
-            laser.SetPosition(count, index);
-            count++;
+            laser.positionCount = laserIndices.Count + 1;
+            laser.SetPosition(laserIndices.Count, targetPosition);
         }
     }
 }

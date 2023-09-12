@@ -17,11 +17,9 @@ public class LaserBeam : MonoBehaviour
         laser = laserObj.AddComponent<LineRenderer>();
         laser.startWidth = 0.1f;
         laser.endWidth = 0.1f;
-        laser.startColor = Color.green;
-        laser.endColor = Color.green;
         laser.material = material;
 
-        targetPosition = pos + dir * 100; //Default target position
+        targetPosition = pos + dir * 100; // Default target position
 
         CastLaser(pos, dir);
     }
@@ -48,9 +46,22 @@ public class LaserBeam : MonoBehaviour
                 }
                 else if (hit.collider.CompareTag("Receiver"))
                 {
-                    reachedTarget = true;
-                    targetPosition = hit.point; // Update
-                    break;
+                    Color sourceColor = Color.white;
+                    Color receiverColor = Color.white;
+
+                    LaserController laserController = hit.collider.GetComponent<LaserController>();
+                    if (laserController != null)
+                    {
+                        sourceColor = laserController.sourceColor;
+                        receiverColor = laserController.receiverColor;
+                    }
+
+                    if (IsColorMatch(sourceColor, receiverColor))
+                    {
+                        reachedTarget = true;
+                        targetPosition = hit.point;
+                        EndGame();
+                    }
                 }
                 else
                 {
@@ -78,5 +89,21 @@ public class LaserBeam : MonoBehaviour
             laser.positionCount = laserIndices.Count + 1;
             laser.SetPosition(laserIndices.Count, targetPosition);
         }
+    }
+
+    private bool IsColorMatch(Color sourceColor, Color receiverColor)
+    {
+        return sourceColor.Equals(receiverColor);
+    }
+
+    private void EndGame()
+    {
+        Debug.Log("Level Completed!!!");
+
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #else
+                Application.Quit();
+        #endif
     }
 }
